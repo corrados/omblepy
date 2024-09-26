@@ -275,6 +275,16 @@ def appendCsv(allRecords):
             for recordDict in allRecords[userIdx]:
                 recordDict["datetime"] = recordDict["datetime"].strftime("%Y-%m-%d %H:%M:%S")
                 writer.writerow(recordDict)
+        with open(f"user{userIdx+1}_new.csv", mode='w', newline='', encoding='utf-8') as outfile:
+            writer = csv.DictWriter(outfile, fieldnames = ["datetime", "sys/dia"])
+            for recordDict in allRecords[userIdx]:
+                recordDict["sys/dia"] = str(recordDict["sys"]) + "/" + str(recordDict["dia"])
+                recordDict.pop('dia')
+                recordDict.pop('sys')
+                recordDict.pop('bpm')
+                recordDict.pop('mov')
+                recordDict.pop('ihb')
+                writer.writerow(recordDict)
 
 def saveUBPMJson(allRecords):
     f = pathlib.Path(f"ubpm.json")
@@ -380,7 +390,7 @@ async def main():
             allRecs = await devSpecificDriver.getRecords(btobj = bluetoothTxRxObj, useUnreadCounter = args.newRecOnly, syncTime = args.timeSync)
             logger.info("communication finished")
             appendCsv(allRecs)
-            saveUBPMJson(allRecs)
+            #saveUBPMJson(allRecs)
     finally:
         logger.info("unpair and disconnect")
         await bleClient.unpair()
